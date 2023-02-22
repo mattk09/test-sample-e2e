@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
+    <PackageReference Include="Azure.Identity" Version="1.8.2" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.18.2" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sample\Sample.csproj" />
+    <ProjectReference Include="..\Sample.Storage.Azure\Sample.Storage.Azure.csproj" />
+    <ProjectReference Include="..\Sample.Contracts\Sample.Contracts.csproj" />
+    <ProjectReference Include="..\Sample.Observability.Prometheus\Sample.Observability.Prometheus.csproj" />
+    <ProjectReference Include="..\Sample.Observability.ApplicationInsights\Sample.Observability.ApplicationInsights.csproj" />
+    <ProjectReference Include="..\Sample.Observability.OpenTelemetry\Sample.Observability.OpenTelemetry.csproj" />
+  </ItemGroup>
+
+</Project>

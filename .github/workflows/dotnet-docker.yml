@@ -1,0 +1,62 @@
+name: dotnet build and push to docker registry
+
+on:
+  push:
+    branches:
+    paths:
+    - .github/workflows/dotnet-docker.yml
+    - src/**
+    - docker/**
+    - ./Sample.Project.Template.sln
+    - ./docker-compose.yml
+
+env:
+  # By default this pushes to ghcr.io, set secrets to override
+  CONTAINER_REGISTRY_URL: ${{ secrets.CONTAINER_REGISTRY_URL }}
+  CONTAINER_REGISTRY_USER: ${{ secrets.CONTAINER_REGISTRY_USER }}
+  CONTAINER_REGISTRY_ACCESS_TOKEN: ${{ secrets.CONTAINER_REGISTRY_ACCESS_TOKEN }}
+  CONTAINER_IMAGE_NAME: ${{ github.repository }}
+  DOCKERFILE_PATH: ./docker/sample-webapi/Dockerfile
+
+jobs:
+  docker-build-and-push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Use GitHub Container Registry if no secrets are set
+      if: ${{ env.CONTAINER_REGISTRY_URL == '' }}
+      run: |
+        echo "CONTAINER_REGISTRY_URL=ghcr.io" >> $GITHUB_ENV
+        echo "CONTAINER_REGISTRY_ACCESS_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+        echo "CONTAINER_REGISTRY_USER=$GITHUB_ACTOR" >> $GITHUB_ENV
+
+    - name: Login to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.CONTAINER_REGISTRY_URL }}
+        username: ${{ env.CONTAINER_REGISTRY_USER }}
+        password: ${{ env.CONTAINER_REGISTRY_ACCESS_TOKEN }}
+
+    - name: Docker metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.CONTAINER_REGISTRY_URL }}/${{ env.CONTAINER_IMAGE_NAME }}
+        tags: |
+          type=schedule
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        context: .
+        file: ${{ env.DOCKERFILE_PATH }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}

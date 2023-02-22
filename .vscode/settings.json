@@ -1,0 +1,13 @@
+{
+  "azureFunctions.projectSubpath": "src/Sample.Functions",
+  "azureFunctions.deploySubpath": "src/Sample.Functions/bin/Release/net7.0/publish",
+  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.preDeployTask": "publish (functions)",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": [
+      ".github/workflows/**/*.yaml"
+    ]
+  }
+}

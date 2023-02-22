@@ -1,0 +1,14 @@
+{
+    "masterKey": {
+        "name": "master",
+        "value": "local-default-master-key",
+        "encrypted": false
+    },
+    "functionKeys": [
+        {
+            "name": "default",
+            "value": "local-default-function-key",
+            "encrypted": false
+        }
+    ]
+}

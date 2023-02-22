@@ -1,0 +1,82 @@
+version: '3.9'
+
+networks:
+  sample-network:
+
+volumes:
+  grafana_data:
+  prometheus_data:
+  logger_data:
+  db_data:
+
+services:
+
+  sample-webapi:
+    build:
+      context: .
+      dockerfile: ./docker/sample-webapi/Dockerfile
+    environment:
+      - Features__UseStorageSimulator=true
+      - Features__UseFunctionsSimulator=false
+      - TelemetryProvider=OpenTelemetry
+      - OpenTelemetrySettings__JaegerExporterHost=jaeger
+      - OpenTelemetrySettings__JaegerExporterPort=6831
+      - FunctionsAppHostName=sample-functions
+      - FunctionsAppHostNameScheme=http
+      - function__helloworldsecure__default=local-default-function-key # From host.json, append to url: ?code=local-default-function-key
+    ports:
+      - 8081:80
+    networks:
+      - sample-network
+
+  sample-functions:
+    build:
+      context: .
+      dockerfile: ./docker/sample-functions/Dockerfile
+    environment:
+      - TelemetryProvider=OpenTelemetry
+      - OpenTelemetrySettings__JaegerExporterHost=jaeger
+      - OpenTelemetrySettings__JaegerExporterPort=6831
+      - OpenTelemetrySettings__ServiceName=Sample.Functions
+    ports:
+      - 8082:80
+    networks:
+      - sample-network
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    networks:
+      - sample-network
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - sample-network
+
+  jaeger:
+    image: jaegertracing/opentelemetry-all-in-one
+    ports:
+      - 5775:5775/udp
+      - 5778:5778
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 9411:9411
+      - 14268:14268
+      - 16686:16686 # Use this for browser navigation
+    networks:
+      - sample-network

@@ -1,0 +1,40 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+  "name": "Ubuntu-22.04",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    // See more features here: https://github.com/devcontainers/features/tree/main/src
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/dotnet:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "containerUser": "vscode",
+  "postCreateCommand": "./.devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-azuretools.vscode-bicep",
+        "editorconfig.editorconfig",
+        "eamodio.gitlens",
+        "oderwat.indent-rainbow",
+        "mechatroner.rainbow-csv",
+        "davidanson.vscode-markdownlint",
+        "aliasadidev.nugetpackagemanagergui"
+      ]
+    }
+  },
+  "mounts": [
+    {
+      "source": "dind-var-lib-docker-complete-sample",
+      "target": "/var/lib/docker",
+      "type": "volume"
+    }
+  ]
+}

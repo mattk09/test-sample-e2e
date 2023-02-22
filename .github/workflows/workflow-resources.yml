@@ -1,0 +1,70 @@
+name: deploy and manage workflow resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource-group-name:
+        required: false
+        description: Azure resource group name (Leave empty to default to 'mattk09-workflow')
+        type: string
+      location:
+        required: false
+        description: Azure resource group location (Leave empty to default to centralus)
+        type: string
+  push:
+    branches:
+    paths:
+    - .github/workflows/workflow-resources.yml
+    - bicep/main-sample-workflow-resources.bicep
+
+env:
+  AZURE_RESOURCE_GROUP_NAME: ${{ github.event.inputs.resource-group-name || 'mattk09-workflow' }}
+  AZURE_RESOURCE_GROUP_LOCATION: ${{ github.event.inputs.location || 'centralus' }}
+
+jobs:
+  generate-and-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set current Azure Subscription
+      run: |
+        az account show
+        echo "AZURE_SUBSCRIPTION_ID=$(az account show --query "id" --output tsv)" >> $GITHUB_ENV
+        echo "Logged in! 🎉"
+
+    - name: Create Azure Resource Group
+      uses: Azure/CLI@v1
+      with:
+        inlineScript: |
+          #!/usr/bin/env bash
+
+          az group create --name $AZURE_RESOURCE_GROUP_NAME --location $AZURE_RESOURCE_GROUP_LOCATION
+
+    - name: Deploy bicep 💪
+      id: azure-deploy
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ env.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+        template: ./bicep/main-sample-workflow-resources.bicep
+        failOnStdErr: false
+        parameters: >-
+          developerObjectIdKeyVaultAccessPolicy="${{ secrets.AZURE_DEVELOPER_OBJECT_ID }}"
+          additionalSampleSecret="${{ secrets.TEST_SAMPLE }}"
+
+    - name: Public Key Artifact
+      env:
+        AZURE_DEPLOY_OUTPUT: ${{ toJSON(steps.azure-deploy.outputs) }}
+      run: |
+        mkdir artifacts
+        echo $AZURE_DEPLOY_OUTPUT >> artifacts/deployment.json
+
+        echo $AZURE_DEPLOY_OUTPUT

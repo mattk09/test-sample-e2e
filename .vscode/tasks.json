@@ -1,0 +1,92 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build dotnet sln",
+      "command": "dotnet",
+      "type": "shell",
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "test dotnet sln",
+      "command": "dotnet",
+      "type": "shell",
+      "args": [
+        "test"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "start Sample.Functions locally",
+      "type": "func",
+      "dependsOn": [
+        "build dotnet sln"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Sample.Functions/bin/Debug/net7.0"
+      },
+      "command": "host start",
+      "isBackground": true,
+      "problemMatcher": "$func-dotnet-watch"
+    },
+    {
+      "label": "build main-sample-service.bicep",
+      "command": "az",
+      "type": "shell",
+      "args": [
+          "bicep",
+          "build",
+          "--file",
+          "${workspaceFolder}/bicep/main-sample-service.bicep",
+          "--stdout"
+      ],
+      "group": {
+          "kind": "build",
+      },
+      "presentation": {
+          "reveal": "silent"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build dotnet sln through docker-compose",
+      "command": "docker-compose",
+      "type": "shell",
+      "args": [
+        "build"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+      }
+    },
+    {
+      "label": "run dotnet sln through docker-compose",
+      "command": "docker-compose",
+      "type": "shell",
+      "args": [
+        "up"
+      ],
+      "problemMatcher": "$msCompile",
+      "dependsOn": [
+        "build dotnet sln through docker-compose"
+      ],
+      "group": {
+        "kind": "none"
+      }
+    }
+  ]
+}
