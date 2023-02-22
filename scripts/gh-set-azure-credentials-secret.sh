@@ -51,4 +51,7 @@ set_repository_variable "AZURE_TENANT_ID" "$(echo $AZURE_AUTH_CREDENTIALS | jq '
 set_repository_variable "AZURE_SUBSCRIPTION_ID" "$AZURE_SUBSCRIPTION_ID"
 set_repository_variable "SERVICE_PRINCIPAL_NAME" "$SERVICE_PRINCIPAL_NAME"
 
+set_repository_variable "RESOURCE_GROUP" "$RESOURCE_GROUP"
+set_repository_variable "LOCATION" "$LOCATION"
+
 gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$ORGANIZATION_NAME/$REPOSITORY_NAME/actions/variables"
